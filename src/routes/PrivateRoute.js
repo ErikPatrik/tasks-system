@@ -1,5 +1,5 @@
 // Navigate: enviar usuário para determinar página
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 
 export default function PrivateRoute({
     //componente que vai renderizar
@@ -9,7 +9,7 @@ export default function PrivateRoute({
 }){
 
     const loading = false;
-    const signed = true;
+    const signed = false;
 
     // Se está logando, aparece uma mensagem informando que ta logando
     if (loading) {
