@@ -1,5 +1,7 @@
 // Navigate: enviar usuário para determinar página
+import { useContext } from 'react'
 import { Navigate } from 'react-router-dom'
+import { AuthContext } from '../contexts/auth'
 
 export default function PrivateRoute({
     //componente que vai renderizar
@@ -8,8 +10,7 @@ export default function PrivateRoute({
     ...rest // e repassa todas as propriedades que o react dom tem
 }){
 
-    const loading = false;
-    const signed = false;
+    const { signed, loading } = useContext(AuthContext)
 
     // Se está logando, aparece uma mensagem informando que ta logando
     if (loading) {
