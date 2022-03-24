@@ -1,4 +1,5 @@
-import { useState  } from 'react';
+import { useState, useContext  } from 'react';
+import { AuthContext} from '../../contexts/auth'
 import { Link } from 'react-router-dom'
 import './signin.css'
 import logo from '../../assets/logo.png'
@@ -7,9 +8,14 @@ function SignIn() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
+    const { signIn, loadingAuth } = useContext(AuthContext)
+
     const handleSubmit = (e) => {
         e.preventDefault()
-        alert('CLICOU')
+
+        if (email !== '' && password !== '') {
+            signIn(email, password)
+        }
     }
 
 return (
@@ -23,7 +29,7 @@ return (
                 <h1>Sign In</h1>
                 <input type="text" placeholder='email@email.com' value={email} onChange={(event) => setEmail(event.target.value)}></input>
                 <input type="password" placeholder='*******' value={password} onChange={(e) => setPassword(e.target.value)}></input>
-                <button type="submit">Login</button>
+                <button type="submit">{ loadingAuth ? 'Loading...' : 'Login' }</button>
             </form>
 
             <Link to="/register">Create new account</Link>
