@@ -15,17 +15,17 @@ export default function Header() {
                 <img src={user.avatarUrl === null ? avatar : user.avatarUrl } alt="Picture avatar" />
             </div>
 
-            <Link to="/dashaboard">
+            <Link to="/dashboard">
             <FiHome color="#FFF" size={24}/>
                 Tasks
             </Link>
 
-            <Link to="/dashaboard">
+            <Link to="/customers">
             <FiUser color="#FFF" size={24}/>
                 Clients
             </Link>
 
-            <Link to="/dashaboard">
+            <Link to="/profile">
             <FiSettings color="#FFF" size={24}/>
                 Settings
             </Link>

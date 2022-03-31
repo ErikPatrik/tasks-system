@@ -7,6 +7,7 @@ import PrivateRoute from './PrivateRoute'
 import SignIn from '../pages/SignIn'
 import SignUp from '../pages/SignUp'
 import Dashboard from '../pages/Dashboard'
+import Profile from '../pages/Profile'
 
 // Quando acessar a página principal, renderiza o componente da página de login
 
@@ -17,6 +18,7 @@ export default function RoutesApp() {
                 <Route exact path="/" element={<SignIn />} />
                 <Route exact path="/register" element={<SignUp />} />
                 <Route exact path="/dashboard/*" element={<PrivateRoute component={Dashboard} isPrivate />} />
+                <Route exact path="/profile" element={<PrivateRoute component={Profile} isPrivate />} />
             </Routes>
         </Router>
     )
