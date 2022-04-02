@@ -7,6 +7,10 @@ import Title from '../../components/Title'
 
 import { FiUser} from 'react-icons/fi'
 
+import firebase from "../../services/FirebaseConnection";
+
+import { toast } from 'react-toastify'
+
 export default function Customers() {
 
     const [nomeFantasia, setNomeFantasia] = useState('')
@@ -14,9 +18,28 @@ export default function Customers() {
     const [endereco, setEndereco] = useState('')
 
 
-    const handleAdd = (e) => {
+    const handleAdd = async (e) => {
         e.preventDefault()
-        alert('asdopjas')
+        if (nomeFantasia !== '' && cnpj !== '' && endereco !== '') {
+            await firebase.firestore().collection('customers')
+            .add({
+                nomeFantasia: nomeFantasia,
+                cnpj: cnpj,
+                endereco: endereco
+            }).then(() => {
+                setNomeFantasia('')
+                setCnpj('')
+                setEndereco('')
+
+                toast.success('Customer save successfully!')
+            })
+            .catch((err) => {
+                console.log(err)
+                toast.error('Error to save customer!')
+            })
+        } else {
+            toast.error('Check the fields to save the customer!')
+        }
     }
 
     return(
