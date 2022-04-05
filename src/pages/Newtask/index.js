@@ -1,19 +1,90 @@
-import { useState } from 'react'
+import { useState, useEffect, useContext  } from 'react'
+import { AuthContext } from '../../contexts/auth'
+import firebase from '../../services/FirebaseConnection'
 
 import './newtask.css'
 
 import Header from '../../components/Header'
 import Title from '../../components/Title'
 import { FiPlus } from 'react-icons/fi'
+import { toast } from 'react-toastify'
 
 export default function Newtask() {
+    const [customers, setCustomers] = useState([])
+    const [loadCustomers, setLoadCustomers] = useState(true)
+    const [customerSelected, setCustomerSelected] = useState(0)
+
     const [subject, setSubject] = useState('Support')
     const [status, setStatus] = useState('Open')
     const [additional, setAdditional] = useState('')
 
+    const { user } = useContext(AuthContext)
+
+    // when screen open, loading data about customers
+    useEffect(() => {
+        async function loadCustomers() {
+            await firebase.firestore().collection('customers')
+            .get()
+            .then((re) => {
+                let list = []
+
+                re.forEach((doc) => {
+                    list.push({
+                        id: doc.id,
+                        nomeFantasia: doc.data().nomeFantasia,
+                    })
+                })
+
+                if (list.length === 0) {
+                    console.log('No data to show')
+                    setLoadCustomers(false)
+                    setCustomers([ {
+                        id: 1,
+                        nomeFantasia: ''
+                    }])
+                    return
+                }
+
+                setCustomers(list)
+                setLoadCustomers(false)
+            })
+            .catch((err) => {
+                console.log("Error", err)
+                // if error, set Load to false and add a fake customer
+                setLoadCustomers(false)
+                setCustomers([ {
+                    id: 1,
+                    nomeFantasia: ''
+                }])
+            })
+        }
+
+        loadCustomers()
+    }, [])
+
+    // when submit form, save a task
     const handleSubmit = async (e) => {
         e.preventDefault()
-        alert('oi')
+
+        await firebase.firestore().collection('tasks')
+        .add({ // generate a key to task
+            created: new Date(),
+            cliente: customers[customerSelected].nomeFantasia,
+            clienteId: customers[customerSelected].id,
+            assunto: subject,
+            status: status,
+            complemento: additional,
+            userId: user.uid
+        })
+        .then(() => {
+            toast.success('Task save, thanks!')
+            setAdditional('')
+            setCustomerSelected(0) //return to first item
+        })
+        .catch((err) => {
+            console.log(err)
+            toast.error('Erro to save Task! Try again.')
+        })
     }
 
     // when change the subject select
@@ -25,6 +96,13 @@ export default function Newtask() {
     // when change the status
     const handleOptionChange = (e) => {
         setStatus(e.target.value)
+    }
+
+    // when change the customer
+    const handleChangeCustomers = (e) => {
+        // e.target.value (customer index)
+        // console.log('customer selected', customers[e.target.value])
+        setCustomerSelected(e.target.value)
     }
 
     return(
@@ -39,11 +117,20 @@ export default function Newtask() {
                 <div className='container'>
                     <form className='form-profile' onSubmit={handleSubmit}>
                         <label>Customers</label>
-                        <select>
-                            <option key={1} value={1}>
-                                Erik
-                            </option>
-                        </select>
+                        {loadCustomers ? (
+                            <input type="text" disabled={true} value="Loading..."/>
+                            ) : (
+                            <select value={customerSelected} onChange={handleChangeCustomers}>
+                                {customers.map((item, index) => {
+                                    return(
+                                        <option key={item.id} value={index}>
+                                            {item.nomeFantasia}
+                                        </option>
+                                    )
+                                })}
+                            </select>
+                            )
+                        }
 
                         <label>Subject</label>
                         <select value={subject} onChange={handleChangeSelectSubject} >
