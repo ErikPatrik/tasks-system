@@ -2,7 +2,7 @@ import { useState, useEffect, useContext  } from 'react'
 import { AuthContext } from '../../contexts/auth'
 import firebase from '../../services/FirebaseConnection'
 
-import { Navigate, useNavigate, useParams  } from 'react-router-dom'
+import { useNavigate, useParams  } from 'react-router-dom'
 
 import './newtask.css'
 
