@@ -23,6 +23,7 @@ export default function RoutesApp() {
                 <Route exact path="/profile" element={<PrivateRoute component={Profile} isPrivate />} />
                 <Route exact path="/customers" element={<PrivateRoute component={Customers} isPrivate />} />
                 <Route exact path="/newtask" element={<PrivateRoute component={Newtask} isPrivate />} />
+                <Route exact path="/newtask/:id" element={<PrivateRoute component={Newtask} isPrivate />} />
             </Routes>
         </Router>
     )

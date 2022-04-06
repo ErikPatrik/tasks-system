@@ -11,7 +11,9 @@ import { Link } from 'react-router-dom'
 import firebase from '../../services/FirebaseConnection'
 import { toast } from 'react-toastify';
 
-import { format } from 'date-fns';
+import { format, setDate } from 'date-fns';
+
+import Modal from '../../components/Modal'
 
 const listRef = firebase.firestore().collection('tasks').orderBy('created', 'desc')
 
@@ -23,7 +25,28 @@ function Dashboard() {
     const [isEmpty, setIsEmpty] = useState(false)
     const [lastDocs, setLastDocs] = useState()
 
+    //save item click
+    const [showPostModal, setShowPostModal] = useState(false)
+    //data detail
+    const [detail, setDetail] = useState()
+
     useEffect(() => {
+
+        // get the tasks
+        const loadTasks = async() => {
+            await listRef.limit(5)
+            .get()
+            .then((res) => {
+                updateState(res)
+            })
+            .catch((err) => {
+                console.log(err)
+                toast.error('Error to get tasks!')
+                setLoadingMore(false)
+            })
+
+        setLoading(false)
+    }
 
         loadTasks()
 
@@ -32,22 +55,6 @@ function Dashboard() {
 
         }
     },[])
-
-    // get the tasks
-    const loadTasks = async() => {
-        await listRef.limit(5)
-        .get()
-        .then((res) => {
-            updateState(res)
-        })
-        .catch((err) => {
-            console.log(err)
-            toast.error('Error to get tasks!')
-            setLoadingMore(false)
-        })
-
-        setLoading(false)
-    }
 
     const updateState = async (res) => {
         // if no tasks (empty)
@@ -90,7 +97,19 @@ function Dashboard() {
         })
     }
 
-    // condidionta render
+    const togglePostModal = (item) => {
+        setShowPostModal(!showPostModal) // change value with value base // true === false, false === true
+        setDetail(item)
+    }
+
+    document.onkeydown = function(evt) {
+        evt = evt || window.event;
+        if (evt.keyCode == 27) {
+            setShowPostModal(false)
+        }
+    };
+
+    // condition render
     if (loading) {
         return(
             <div>
@@ -158,12 +177,12 @@ return (
                                 </td>
                                 <td data-label="Created">{item.createdFormated}</td>
                                 <td data-label="#">
-                                    <button className='action' style={{backgroundColor: '#3583f6'}}>
+                                    <button className='action' style={{backgroundColor: '#3583f6'}} onClick={() => togglePostModal(item)}>
                                         <FiSearch color='#FFF' size={17} />
                                     </button>
-                                    <button className='action' style={{backgroundColor: '#f6a935'}}>
+                                    <Link className='action' style={{backgroundColor: '#f6a935'}} to={`/newtask/${item.id}`}>
                                         <FiEdit2 color='#FFF' size={17} />
-                                    </button>
+                                    </Link>
                                 </td>
                                 </tr>
                             )
@@ -175,8 +194,12 @@ return (
                 { !loadingMore && !isEmpty && <button className='btn-more' onClick={handleMore}>Load more tasks</button>}
                 </>
             )}
-
         </div>
+
+        {showPostModal && (
+            <Modal content={detail} close={togglePostModal} />
+        )}
+
     </div>
 );
 }

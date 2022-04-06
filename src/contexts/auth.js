@@ -51,7 +51,7 @@ function AuthProvider({children}) {
             setLoadingAuth(false)
             toast.success('Welcome again')
         })
-        .catch((error) => {
+        .catch(() => {
             toast.error('Ooops... Something is wrong!')
         })
     }

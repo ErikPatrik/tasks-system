@@ -34,7 +34,7 @@ return (
                 <button type="submit">{ loadingAuth ? 'Loading...' : 'Register' }</button>
             </form>
 
-            <Link to="/">Have a account? Login  here</Link>
+            <Link to="/">Have a account? Login here</Link>
         </div>
     </div>
 );

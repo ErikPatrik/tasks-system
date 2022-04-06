@@ -2,6 +2,8 @@ import { useState, useEffect, useContext  } from 'react'
 import { AuthContext } from '../../contexts/auth'
 import firebase from '../../services/FirebaseConnection'
 
+import { Navigate, useNavigate, useParams  } from 'react-router-dom'
+
 import './newtask.css'
 
 import Header from '../../components/Header'
@@ -10,6 +12,9 @@ import { FiPlus } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 
 export default function Newtask() {
+    const { id } = useParams()
+    const navigate = useNavigate()
+
     const [customers, setCustomers] = useState([])
     const [loadCustomers, setLoadCustomers] = useState(true)
     const [customerSelected, setCustomerSelected] = useState(0)
@@ -18,6 +23,9 @@ export default function Newtask() {
     const [status, setStatus] = useState('Open')
     const [additional, setAdditional] = useState('')
 
+    // verify if is edit
+    const [idCustomer, setIdCustomer] = useState(false)
+
     const { user } = useContext(AuthContext)
 
     // when screen open, loading data about customers
@@ -25,10 +33,10 @@ export default function Newtask() {
         async function loadCustomers() {
             await firebase.firestore().collection('customers')
             .get()
-            .then((re) => {
+            .then((res) => {
                 let list = []
 
-                re.forEach((doc) => {
+                res.forEach((doc) => {
                     list.push({
                         id: doc.id,
                         nomeFantasia: doc.data().nomeFantasia,
@@ -47,6 +55,11 @@ export default function Newtask() {
 
                 setCustomers(list)
                 setLoadCustomers(false)
+
+                // check if is Edit
+                if (id) {
+                    loadId(list)
+                }
             })
             .catch((err) => {
                 console.log("Error", err)
@@ -60,11 +73,60 @@ export default function Newtask() {
         }
 
         loadCustomers()
-    }, [])
+    }, [id])
+
+    const loadId = async(list) => {
+        // get in firebase the id
+        await firebase.firestore().collection('tasks').doc(id)
+        .get()
+        .then((res) => {
+            // find the task
+            setSubject(res.data().assunto)
+            setStatus(res.data().status)
+            setAdditional(res.data().complemento)
+
+            let index = list.findIndex(item => item.id === res.data().clienteId)
+            setCustomerSelected(index)
+
+            // say is edit situation
+            setIdCustomer(true)
+        })
+        .catch((err) => {
+            console.log(err)
+            toast.error('Error, contact the support!')
+            setIdCustomer(false)
+        })
+    }
 
     // when submit form, save a task
     const handleSubmit = async (e) => {
         e.preventDefault()
+
+        // try edit a task
+        if (idCustomer) {
+            await firebase.firestore().collection('tasks')
+            .doc(id)
+            .update({
+                cliente: customers[customerSelected].nomeFantasia,
+                clienteId: customers[customerSelected].id,
+                assunto: subject,
+                status: status,
+                complemento: additional,
+                userId: user.uid
+            })
+            .then(() => {
+                toast.success('Task updated!')
+                setCustomerSelected(0) //return to first item
+                setAdditional('')
+                navigate('/dashboard')
+            })
+            .catch((err) => {
+                toast.error('Error to update task!')
+                console.log(err)
+            })
+
+            return
+        }
 
         await firebase.firestore().collection('tasks')
         .add({ // generate a key to task
